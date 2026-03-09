@@ -10,17 +10,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install CocoaPods
         run: sudo gem install cocoapods
 
-      - name: Install dependencies
-        run: |
-          cd Linphone
-          pod install
+      - name: Install Pods
+        run: pod install
 
-      - name: Build iOS App
+      - name: Build App
         run: |
           xcodebuild \
           -workspace Linphone.xcworkspace \
@@ -29,8 +27,8 @@ jobs:
           -configuration Release \
           build
 
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: voipmatrix-ios-build
+          name: ios-build
           path: build
