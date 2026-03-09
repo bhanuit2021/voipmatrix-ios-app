@@ -1,1 +1,36 @@
+name: Build VoIPMatrix iOS
 
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install CocoaPods
+        run: sudo gem install cocoapods
+
+      - name: Install dependencies
+        run: |
+          cd Linphone
+          pod install
+
+      - name: Build iOS App
+        run: |
+          xcodebuild \
+          -workspace Linphone.xcworkspace \
+          -scheme Linphone \
+          -sdk iphoneos \
+          -configuration Release \
+          build
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: voipmatrix-ios-build
+          path: build
