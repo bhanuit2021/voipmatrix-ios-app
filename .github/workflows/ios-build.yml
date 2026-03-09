@@ -1,30 +1,52 @@
 name: Build VoIPMatrix iOS
 
 on:
-  push:
-    branches: [ master ]
+push:
+branches:
+- master
+- main
 
 jobs:
-  build:
-    runs-on: macos-latest
+build:
+runs-on: macos-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+```
+steps:
 
-      - name: Build iOS App
-        run: |
-          xcodebuild \
-          -project LinphoneApp.xcodeproj \
-          -scheme Linphone \
-          -sdk iphoneos \
-          -configuration Release \
-          CODE_SIGNING_ALLOWED=NO \
-          IPHONEOS_DEPLOYMENT_TARGET=15.0 \
-          build
+  - name: Checkout Repository
+    uses: actions/checkout@v4
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-build
-          path: build
+  - name: Select Xcode
+    run: sudo xcode-select -switch /Applications/Xcode.app
+
+  - name: Show Xcode Version
+    run: xcodebuild -version
+
+  - name: Resolve Swift Packages
+    run: |
+      xcodebuild -resolvePackageDependencies \
+      -workspace LinphoneApp.xcworkspace \
+      -scheme Linphone
+
+  - name: Build iOS App
+    run: |
+      xcodebuild \
+      -workspace LinphoneApp.xcworkspace \
+      -scheme Linphone \
+      -configuration Release \
+      -sdk iphoneos \
+      -destination 'generic/platform=iOS' \
+      CODE_SIGNING_ALLOWED=NO \
+      build
+
+  - name: Archive Build
+    run: |
+      mkdir -p build
+      cp -R ~/Library/Developer/Xcode/DerivedData/*/Build/Products/Release-iphoneos/*.app build/ || true
+
+  - name: Upload Artifact
+    uses: actions/upload-artifact@v4
+    with:
+      name: voipmatrix-ios-build
+      path: build
+```
