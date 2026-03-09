@@ -2,6 +2,7 @@ name: iOS Build
 
 on:
 push:
+branches: [ "master", "main" ]
 
 jobs:
 build:
@@ -9,10 +10,20 @@ runs-on: macos-latest
 
 ```
 steps:
-  - uses: actions/checkout@v4
+  - name: Checkout
+    uses: actions/checkout@v4
 
-  - run: xcodebuild -version
+  - name: Show Xcode version
+    run: xcodebuild -version
 
-  - run: |
-      xcodebuild -workspace LinphoneApp.xcworkspace -scheme Linphone -configuration Release -sdk iphoneos -destination "generic/platform=iOS" CODE_SIGNING_ALLOWED=NO build
+  - name: Build iOS
+    run: |
+      xcodebuild \
+      -project LinphoneApp.xcodeproj \
+      -scheme Linphone \
+      -configuration Release \
+      -sdk iphoneos \
+      -destination "generic/platform=iOS" \
+      CODE_SIGNING_ALLOWED=NO \
+      build
 ```
