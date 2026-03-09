@@ -12,13 +12,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build App
+      - name: Build iOS App
         run: |
           xcodebuild \
           -project LinphoneApp.xcodeproj \
           -scheme Linphone \
           -sdk iphoneos \
           -configuration Release \
+          -allowProvisioningUpdates \
           build
 
       - name: Upload Artifact
