@@ -19,7 +19,7 @@ jobs:
           -scheme Linphone \
           -sdk iphoneos \
           -configuration Release \
-          -allowProvisioningUpdates \
+          CODE_SIGNING_ALLOWED=NO \
           build
 
       - name: Upload Artifact
