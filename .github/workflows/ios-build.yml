@@ -20,6 +20,7 @@ jobs:
           -sdk iphoneos \
           -configuration Release \
           CODE_SIGNING_ALLOWED=NO \
+          IPHONEOS_DEPLOYMENT_TARGET=15.0 \
           build
 
       - name: Upload Artifact
