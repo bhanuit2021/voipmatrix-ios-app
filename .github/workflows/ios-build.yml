@@ -3,8 +3,8 @@ name: Build VoIPMatrix iOS
 on:
 push:
 branches:
-- master
 - main
+- master
 
 jobs:
 build:
@@ -12,14 +12,13 @@ runs-on: macos-latest
 
 ```
 steps:
-
-  - name: Checkout Repository
+  - name: Checkout repository
     uses: actions/checkout@v4
 
   - name: Select Xcode
     run: sudo xcode-select -switch /Applications/Xcode.app
 
-  - name: Show Xcode Version
+  - name: Show Xcode version
     run: xcodebuild -version
 
   - name: Resolve Swift Packages
@@ -35,16 +34,16 @@ steps:
       -scheme Linphone \
       -configuration Release \
       -sdk iphoneos \
-      -destination 'generic/platform=iOS' \
+      -destination "generic/platform=iOS" \
       CODE_SIGNING_ALLOWED=NO \
       build
 
-  - name: Archive Build
+  - name: Collect build
     run: |
       mkdir -p build
       cp -R ~/Library/Developer/Xcode/DerivedData/*/Build/Products/Release-iphoneos/*.app build/ || true
 
-  - name: Upload Artifact
+  - name: Upload artifact
     uses: actions/upload-artifact@v4
     with:
       name: voipmatrix-ios-build
