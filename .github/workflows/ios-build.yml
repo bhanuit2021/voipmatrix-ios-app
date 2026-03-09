@@ -12,19 +12,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install CocoaPods
-        run: sudo gem install cocoapods
-
-      - name: Install Pods
-        run: |
-          cd Linphone
-          pod install
-
       - name: Build App
         run: |
-          cd Linphone
           xcodebuild \
-          -workspace Linphone.xcworkspace \
+          -project LinphoneApp.xcodeproj \
           -scheme Linphone \
           -sdk iphoneos \
           -configuration Release \
@@ -34,4 +25,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-build
-          path: Linphone/build
+          path: build
