@@ -1,0 +1,60 @@
+name: Build VoIP Matrix iOS (No Signing)
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: 'latest-stable'
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install CocoaPods
+        run: pod install --repo-update
+
+      - name: Build (No Signing)
+        run: |
+          xcodebuild build \
+            -workspace LinphoneApp.xcodeproj/project.xcworkspace \
+            -scheme Linphone \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            EXPANDED_CODE_SIGN_IDENTITY="" \
+            -derivedDataPath $RUNNER_TEMP/DerivedData
+
+      - name: Create Unsigned IPA
+        run: |
+          APP_PATH=$(find $RUNNER_TEMP/DerivedData -name "*.app" | head -1)
+          mkdir -p $RUNNER_TEMP/Payload
+          cp -r "$APP_PATH" $RUNNER_TEMP/Payload/
+          cd $RUNNER_TEMP
+          zip -r VoIPMatrix-unsigned.ipa Payload/
+
+      - name: Upload Unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoIPMatrix-unsigned-ipa
+          path: ${{ runner.temp }}/VoIPMatrix-unsigned.ipa
+          retention-days: 30
