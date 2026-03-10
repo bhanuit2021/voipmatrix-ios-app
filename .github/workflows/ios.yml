@@ -20,37 +20,46 @@ jobs:
         with:
           xcode-version: 'latest-stable'
 
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
-      - name: Install CocoaPods
-        run: pod install --repo-update
-
-      - name: Build (No Signing)
+      - name: Build Archive (No Signing)
         run: |
-          xcodebuild build \
+          xcodebuild archive \
             -workspace LinphoneApp.xcodeproj/project.xcworkspace \
             -scheme Linphone \
             -configuration Release \
             -destination 'generic/platform=iOS' \
+            -archivePath $RUNNER_TEMP/VoIPMatrix.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            EXPANDED_CODE_SIGN_IDENTITY="" \
-            -derivedDataPath $RUNNER_TEMP/DerivedData
+            EXPANDED_CODE_SIGN_IDENTITY=""
+
+      - name: Create Entitlements File
+        run: |
+          cat > $RUNNER_TEMP/entitlements.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>get-task-allow</key>
+            <true/>
+            <key>com.apple.developer.voip</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
 
       - name: Create Unsigned IPA
         run: |
-          APP_PATH=$(find $RUNNER_TEMP/DerivedData -name "*.app" | head -1)
+          APP_PATH=$(find $RUNNER_TEMP/VoIPMatrix.xcarchive/Products -name "*.app" | head -1)
+          echo "App path: $APP_PATH"
+          codesign --remove-signature "$APP_PATH" || true
+          find "$APP_PATH/Frameworks" -name "*.framework" -exec codesign --remove-signature {} \; || true
+          find "$APP_PATH/Frameworks" -name "*.dylib" -exec codesign --remove-signature {} \; || true
+          codesign -f -s - --entitlements $RUNNER_TEMP/entitlements.plist "$APP_PATH" || true
           mkdir -p $RUNNER_TEMP/Payload
-          cp -r "$APP_PATH" $RUNNER_TEMP/Payload/
+          cp -rL "$APP_PATH" $RUNNER_TEMP/Payload/
           cd $RUNNER_TEMP
-          zip -r VoIPMatrix-unsigned.ipa Payload/
+          zip -ry VoIPMatrix-unsigned.ipa Payload/
 
       - name: Upload Unsigned IPA
         uses: actions/upload-artifact@v4
