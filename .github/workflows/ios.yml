@@ -20,69 +20,37 @@ jobs:
         with:
           xcode-version: 'latest-stable'
 
-      - name: Build Archive (No Signing)
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install CocoaPods
+        run: pod install --repo-update
+
+      - name: Build (No Signing)
         run: |
-          xcodebuild archive \
+          xcodebuild build \
             -workspace LinphoneApp.xcodeproj/project.xcworkspace \
             -scheme Linphone \
             -configuration Release \
             -destination 'generic/platform=iOS' \
-            -archivePath $RUNNER_TEMP/VoIPMatrix.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            EXPANDED_CODE_SIGN_IDENTITY=""
+            EXPANDED_CODE_SIGN_IDENTITY="" \
+            -derivedDataPath $RUNNER_TEMP/DerivedData
 
-      - name: Create Entitlements File
+      - name: Create Unsigned IPA
         run: |
-          cat > $RUNNER_TEMP/entitlements.plist << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>application-identifier</key>
-            <string>$(AppIdentifierPrefix)org.linphone.phone</string>
-            <key>com.apple.developer.team-identifier</key>
-            <string>$(AppIdentifierPrefix)</string>
-            <key>get-task-allow</key>
-            <true/>
-            <key>com.apple.security.application-groups</key>
-            <array>
-              <string>group.org.linphone.phone.msgNotificationService</string>
-            </array>
-            <key>aps-environment</key>
-            <string>development</string>
-            <key>com.apple.developer.voip</key>
-            <true/>
-            <key>UIBackgroundModes</key>
-            <array>
-              <string>voip</string>
-              <string>audio</string>
-              <string>fetch</string>
-              <string>remote-notification</string>
-            </array>
-          </dict>
-          </plist>
-          EOF
-
-      - name: Create Unsigned IPA with Entitlements
-        run: |
-          APP_PATH=$(find $RUNNER_TEMP/VoIPMatrix.xcarchive/Products -name "*.app" | head -1)
-          echo "App path: $APP_PATH"
-
-          # Remove old signatures
-          codesign --remove-signature "$APP_PATH" || true
-          find "$APP_PATH/Frameworks" -name "*.framework" -exec codesign --remove-signature {} \; || true
-          find "$APP_PATH/Frameworks" -name "*.dylib" -exec codesign --remove-signature {} \; || true
-
-          # Re-sign with entitlements using ad-hoc identity
-          codesign -f -s - --entitlements $RUNNER_TEMP/entitlements.plist "$APP_PATH" || true
-
-          # Package IPA
+          APP_PATH=$(find $RUNNER_TEMP/DerivedData -name "*.app" | head -1)
           mkdir -p $RUNNER_TEMP/Payload
-          cp -rL "$APP_PATH" $RUNNER_TEMP/Payload/
+          cp -r "$APP_PATH" $RUNNER_TEMP/Payload/
           cd $RUNNER_TEMP
-          zip -ry VoIPMatrix-unsigned.ipa Payload/
+          zip -r VoIPMatrix-unsigned.ipa Payload/
 
       - name: Upload Unsigned IPA
         uses: actions/upload-artifact@v4
