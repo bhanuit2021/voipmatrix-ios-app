@@ -20,23 +20,22 @@ jobs:
         with:
           xcode-version: 'latest-stable'
 
-
-      - name: Build (No Signing)
+      - name: Build Archive (No Signing)
         run: |
-          xcodebuild build \
+          xcodebuild archive \
             -workspace LinphoneApp.xcodeproj/project.xcworkspace \
             -scheme Linphone \
             -configuration Release \
             -destination 'generic/platform=iOS' \
+            -archivePath $RUNNER_TEMP/VoIPMatrix.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            EXPANDED_CODE_SIGN_IDENTITY="" \
-            -derivedDataPath $RUNNER_TEMP/DerivedData
+            EXPANDED_CODE_SIGN_IDENTITY=""
 
       - name: Create Unsigned IPA
         run: |
-          APP_PATH=$(find $RUNNER_TEMP/DerivedData -name "*.app" | head -1)
+          APP_PATH=$(find $RUNNER_TEMP/VoIPMatrix.xcarchive -name "*.app" | head -1)
           mkdir -p $RUNNER_TEMP/Payload
           cp -r "$APP_PATH" $RUNNER_TEMP/Payload/
           cd $RUNNER_TEMP
