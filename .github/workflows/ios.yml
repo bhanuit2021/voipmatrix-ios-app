@@ -37,6 +37,12 @@ jobs:
         run: |
           APP_PATH=$(find $RUNNER_TEMP/VoIPMatrix.xcarchive/Products -name "*.app" | head -1)
           echo "App path: $APP_PATH"
+          
+          # Remove problematic entitlements
+          codesign --remove-signature "$APP_PATH" || true
+          find "$APP_PATH/Frameworks" -name "*.framework" -exec codesign --remove-signature {} \; || true
+          find "$APP_PATH/Frameworks" -name "*.dylib" -exec codesign --remove-signature {} \; || true
+          
           mkdir -p $RUNNER_TEMP/Payload
           cp -rL "$APP_PATH" $RUNNER_TEMP/Payload/
           cd $RUNNER_TEMP
