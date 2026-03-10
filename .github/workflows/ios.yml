@@ -35,11 +35,12 @@ jobs:
 
       - name: Create Unsigned IPA
         run: |
-          APP_PATH=$(find $RUNNER_TEMP/VoIPMatrix.xcarchive -name "*.app" | head -1)
+          APP_PATH=$(find $RUNNER_TEMP/VoIPMatrix.xcarchive/Products -name "*.app" | head -1)
+          echo "App path: $APP_PATH"
           mkdir -p $RUNNER_TEMP/Payload
-          cp -r "$APP_PATH" $RUNNER_TEMP/Payload/
+          cp -rL "$APP_PATH" $RUNNER_TEMP/Payload/
           cd $RUNNER_TEMP
-          zip -r VoIPMatrix-unsigned.ipa Payload/
+          zip -ry VoIPMatrix-unsigned.ipa Payload/
 
       - name: Upload Unsigned IPA
         uses: actions/upload-artifact@v4
