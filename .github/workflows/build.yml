@@ -24,13 +24,13 @@ jobs:
         run: |
           xcodebuild -resolvePackageDependencies \
             -workspace LinphoneApp.xcodeproj/project.xcworkspace \
-            -scheme LinphoneApp
+            -scheme Linphone
 
       - name: Build (No Signing)
         run: |
           xcodebuild archive \
             -workspace LinphoneApp.xcodeproj/project.xcworkspace \
-            -scheme LinphoneApp \
+            -scheme Linphone \
             -configuration Release \
             -archivePath $RUNNER_TEMP/VoIPMatrix.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
