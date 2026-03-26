@@ -34,7 +34,7 @@ final class ThemeManager: ObservableObject {
 	static let shared = ThemeManager()
 	private let themeKey = "selectedTheme"
 	
-	@Published var currentTheme: Theme = ThemeManager.orange
+	@Published var currentTheme: Theme = ThemeManager.voipmatrix
 	
 	private init() {
 		let storedName = UserDefaults.standard.string(forKey: themeKey)
@@ -67,7 +67,7 @@ final class ThemeManager: ObservableObject {
 		coral.name: coral,
 		plum.name: plum,
 		titanium.name: titanium,
-		mineral_blue.name: mineral_blue
+		voipmatrix.name: voipmatrix
 	]
 	
 	static let orange = Theme(
@@ -165,6 +165,11 @@ final class ThemeManager: ObservableObject {
 		main100: Color(hex: "#C5E0F3"),
 		main500: Color(hex: "#669ED7")
 	)
+	static let voipmatrix = Theme(
+    name: "voipmatrix",
+    main100: Color(hex: "#EEF0FA"),
+    main500: Color(hex: "#3D45AA")
+)
 }
 
 // MARK: - Color Provider (reactive bridge for SwiftUI)
