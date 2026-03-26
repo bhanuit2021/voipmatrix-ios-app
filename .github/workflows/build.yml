@@ -32,7 +32,7 @@ jobs:
             -workspace LinphoneApp.xcodeproj/project.xcworkspace \
             -scheme Linphone \
             -configuration Release \
-            -archivePath $RUNNER_TEMP/VoIPMatrix.xcarchive \
+            -archivePath $RUNNER_TEMP/LinphoneApp.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGN_IDENTITY="" \
             PROVISIONING_PROFILE=""
@@ -40,10 +40,10 @@ jobs:
       - name: Export IPA (unsigned)
         run: |
           mkdir -p $RUNNER_TEMP/ipa
-          cp -r $RUNNER_TEMP/VoIPMatrix.xcarchive/Products/Applications/VoIPMatrix.app \
+          cp -r $RUNNER_TEMP/LinphoneApp.xcarchive/Products/Applications/LinphoneApp.app \
             $RUNNER_TEMP/ipa/
           cd $RUNNER_TEMP/ipa
-          zip -r VoIPMatrix-unsigned.ipa VoIPMatrix.app
+          zip -r VoIPMatrix-unsigned.ipa LinphoneApp.app
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
