@@ -27,6 +27,11 @@ jobs:
         run: |
           mkdir -p ~/.appstoreconnect/private_keys
           echo "$APP_STORE_CONNECT_API_KEY_BASE64" > ~/.appstoreconnect/private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
+          
+      - name: Verify Profiles
+        run: |
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
+          security find-identity -v -p codesigning
 
       - name: Resolve Packages
         run: |
