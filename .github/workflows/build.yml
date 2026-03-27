@@ -67,7 +67,9 @@ jobs:
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution" \
             DEVELOPMENT_TEAM=QKR284CT7A \
-            PROVISIONING_PROFILE_SPECIFIER=VM_Main
+            PROVISIONING_PROFILE_SPECIFIER=VM_Main \
+            CODE_SIGNING_ALLOWED_FOR_APPS=YES \
+            CODE_SIGNING_ALLOWED=NO
 
       - name: Export IPA
         run: |
