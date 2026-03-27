@@ -61,7 +61,8 @@ jobs:
             -scheme Linphone \
             -configuration Release \
             -archivePath $RUNNER_TEMP/VoIPMatrix.xcarchive \
-            -allowProvisioningUpdates \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
             PROVISIONING_PROFILE_SPECIFIER="VoIPMatrix_AppStore"
 
       - name: Export IPA
@@ -75,6 +76,8 @@ jobs:
             <string>app-store</string>
             <key>teamID</key>
             <string>QKR284CT7A</string>
+            <key>signingStyle</key>
+            <string>manual</string>
             <key>provisioningProfiles</key>
             <dict>
               <key>com.voipmatrix.app</key>
